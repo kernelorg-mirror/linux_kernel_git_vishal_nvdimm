@@ -110,7 +110,7 @@ static long pmem_direct_access(struct block_device *bdev, sector_t sector,
 static const struct block_device_operations pmem_fops = {
 	.owner =		THIS_MODULE,
 	.rw_page =		pmem_rw_page,
-	.direct_access =	pmem_direct_access,
+/* 	.direct_access =	pmem_direct_access, */
 	.revalidate_disk =	nvdimm_revalidate_disk,
 };
 
