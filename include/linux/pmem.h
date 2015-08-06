@@ -123,10 +123,10 @@ static inline void __pmem *memremap_pmem(struct device *dev,
  */
 static inline void memcpy_to_pmem(void __pmem *dst, const void *src, size_t n)
 {
-	if (arch_has_pmem_api())
+	/*if (arch_has_pmem_api()) */
 		arch_memcpy_to_pmem(dst, src, n);
-	else
-		default_memcpy_to_pmem(dst, src, n);
+	/*else
+		default_memcpy_to_pmem(dst, src, n);*/
 }
 
 /**
