@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# run with ./t_fio btt or ./t_fio pmem
+
+source common/config
+source common/rc
+
+: "${runs:=3}"
+: "${time:=10}"
+: "${perf:=0}"
+
+perfcmd=
+
+if [ $perf -ne 0 ]; then
+	echo "Using perf, setting runs=1"
+	runs=1
+	perfcmd="perf record -g"
+	rm -f /dev/shm/perf.db
+fi
+
+res=$results/$(basename $0)
+device=$(get_dev $1)
+
+[ -b $device ] || _fail "$0: $device: no such block device"
+
+_basic_checks $device
+
+dev_sub=" -e s|^filename=.*|filename=$device|g"
+time_sub=" -e s|^runtime=.*|runtime=$time|g"
+
+sed $dev_sub $time_sub generic.fio > tmp.fio
+
+[ -s tmp.fio ] || _fail "error in setting up fio config"
+
+for (( i=0; i<$runs; i++ )); do
+	echo "running fio ($i)"
+	drop_caches
+	$perfcmd fio tmp.fio > ${res}_$i 2>&1
+	sleep 1
+done
+
+# analyze
+process_fio_files $results tmp.fio
+
+rm -f tmp.fio
+
+[ -n "$perfcmd" ] && echo "perf stats: $ perf report -g"
+
+# vim:ft=sh

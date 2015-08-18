@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DEBUG=
+
+blksize=4096
+pmem_base_dev=/dev/pmem
+mnt_base=/mnt/mem
+results=results
+
+# vim:ft=sh
