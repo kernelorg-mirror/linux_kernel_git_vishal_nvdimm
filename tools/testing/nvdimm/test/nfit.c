@@ -248,6 +248,8 @@ static int nfit_test_cmd_ars_status(struct nd_cmd_ars_status *nd_cmd,
 
 	nd_cmd->out_length = 256;
 	nd_cmd->num_records = 0;
+	nd_cmd->address = 0;
+	nd_cmd->length = -1ULL;
 	nd_cmd->status = 0;
 
 	return 0;
