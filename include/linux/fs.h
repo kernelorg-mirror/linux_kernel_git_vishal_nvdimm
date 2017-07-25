@@ -2859,6 +2859,7 @@ extern void inode_sb_list_add(struct inode *inode);
 #ifdef CONFIG_BLOCK
 extern int bdev_read_only(struct block_device *);
 #endif
+extern bool bdev_has_badblocks(struct block_device *);
 extern int set_blocksize(struct block_device *, int);
 extern int sb_set_blocksize(struct super_block *, int);
 extern int sb_min_blocksize(struct super_block *, int);
@@ -3257,6 +3258,20 @@ int __init get_filesystem_list(char *buf);
 #define ACC_MODE(x) ("\004\002\006\006"[(x)&O_ACCMODE])
 #define OPEN_FMODE(flag) ((__force fmode_t)(((flag + 1) & O_ACCMODE) | \
 					    (flag & __FMODE_NONOTIFY)))
+
+#ifdef CONFIG_BLOCK
+static inline bool has_badblocks(struct inode *inode)
+{
+	if (S_ISBLK(inode->i_mode) && inode->i_bdev)
+		return bdev_has_badblocks(inode->i_bdev);
+	return false;
+}
+#else
+static inline bool has_badblocks(struct inode *inode)
+{
+	return false;
+}
+#endif
 
 static inline bool is_sxid(umode_t mode)
 {

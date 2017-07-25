@@ -49,6 +49,7 @@ void ack_all_badblocks(struct badblocks *bb);
 ssize_t badblocks_show(struct badblocks *bb, char *page, int unack);
 ssize_t badblocks_store(struct badblocks *bb, const char *page, size_t len,
 			int unack);
+bool badblocks_present(struct badblocks *bb);
 int badblocks_init(struct badblocks *bb, int enable);
 void badblocks_exit(struct badblocks *bb);
 struct device;

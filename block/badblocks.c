@@ -464,6 +464,21 @@ void ack_all_badblocks(struct badblocks *bb)
 EXPORT_SYMBOL_GPL(ack_all_badblocks);
 
 /**
+ * badblocks_present() - check whether any badblocks are present
+ * @bb:		the badblocks structure that holds all badblock information
+ *
+ * Return:
+ *  'true' if badblocks are present, 'false' otherwise
+ */
+bool badblocks_present(struct badblocks *bb)
+{
+	if (bb && bb->count)
+		return true;
+	return false;
+}
+EXPORT_SYMBOL_GPL(badblocks_present);
+
+/**
  * badblocks_show() - sysfs access to bad-blocks list
  * @bb:		the badblocks structure that holds all badblock information
  * @page:	buffer received from sysfs

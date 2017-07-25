@@ -220,7 +220,7 @@ ext4_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 		return -EIO;
 
 #ifdef CONFIG_FS_DAX
-	if (IS_DAX(inode))
+	if (IS_DAX(inode) && !has_badblocks(inode))
 		return ext4_dax_write_iter(iocb, from);
 #endif
 

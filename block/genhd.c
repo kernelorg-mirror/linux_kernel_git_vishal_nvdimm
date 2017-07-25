@@ -1441,6 +1441,12 @@ int invalidate_partition(struct gendisk *disk, int partno)
 
 EXPORT_SYMBOL(invalidate_partition);
 
+bool bdev_has_badblocks(struct block_device *bdev)
+{
+	return badblocks_present(bdev->bd_disk->bb);
+}
+EXPORT_SYMBOL(bdev_has_badblocks);
+
 /*
  * Disk events - monitor disk events like media change and eject request.
  */
