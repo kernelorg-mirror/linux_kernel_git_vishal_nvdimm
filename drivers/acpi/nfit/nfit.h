@@ -75,6 +75,7 @@ enum {
 	NFIT_ARS_CAP_NONE = 1,
 	NFIT_ARS_F_OVERFLOW = 1,
 	NFIT_ARS_TIMEOUT = 90,
+	NFIT_ARS_INJECT_INVALID = 2,
 };
 
 enum nfit_root_notifiers {
