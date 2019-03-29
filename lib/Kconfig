@@ -336,6 +336,13 @@ config GENERIC_ALLOCATOR
 	bool
 
 #
+# Memory Region ID allocation for persistent memory and "specific
+# purpose" / performance differentiated memory ranges.
+#
+config MEMREGION
+	bool
+
+#
 # reed solomon support is select'ed if needed
 #
 config REED_SOLOMON
