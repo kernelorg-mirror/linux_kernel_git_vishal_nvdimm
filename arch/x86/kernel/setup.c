@@ -1104,6 +1104,7 @@ void __init setup_arch(char **cmdline_p)
 
 	memblock_set_current_limit(ISA_END_ADDRESS);
 
+	efi_find_application_reserved();
 	e820__memblock_setup();
 
 	reserve_bios_regions();
