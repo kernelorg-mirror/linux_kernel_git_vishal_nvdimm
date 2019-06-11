@@ -121,6 +121,8 @@ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
 extern struct efi_scratch efi_scratch;
 extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
 extern int __init efi_memblock_x86_reserve_range(void);
+extern void __init efi_find_application_reserved(void);
+extern void __init efi_fake_memmap_early(void);
 extern pgd_t * __init efi_call_phys_prolog(void);
 extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
 extern void __init efi_print_memmap(void);
@@ -141,6 +143,19 @@ extern void efi_switch_mm(struct mm_struct *mm);
 extern void efi_recover_from_page_fault(unsigned long phys_addr);
 extern void efi_free_boot_services(void);
 extern void efi_reserve_boot_services(void);
+
+#ifdef CONFIG_EFI_APPLICATION_RESERVED
+static inline bool is_efi_application_reserved(efi_memory_desc_t *md)
+{
+	return md->type == EFI_CONVENTIONAL_MEMORY
+		&& (md->attribute & EFI_MEMORY_SP);
+}
+#else
+static inline bool is_efi_application_reserved(efi_memory_desc_t *md)
+{
+	return false;
+}
+#endif
 
 struct efi_setup_data {
 	u64 fw_vendor;

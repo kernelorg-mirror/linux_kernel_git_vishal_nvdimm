@@ -757,7 +757,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
 		 *
 		 * Only EFI_CONVENTIONAL_MEMORY is guaranteed to be free.
 		 */
-		if (md->type != EFI_CONVENTIONAL_MEMORY)
+		if (md->type != EFI_CONVENTIONAL_MEMORY
+				|| is_efi_application_reserved(md))
 			continue;
 
 		if (efi_mirror_found &&

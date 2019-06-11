@@ -105,6 +105,9 @@ void __init efi_find_mirror(void)
 	efi_memory_desc_t *md;
 	u64 mirror_size = 0, total_size = 0;
 
+	if (!efi_enabled(EFI_MEMMAP))
+		return;
+
 	for_each_efi_memory_desc(md) {
 		unsigned long long start = md->phys_addr;
 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
@@ -125,10 +128,18 @@ void __init efi_find_mirror(void)
  * more than the max 128 entries that can fit in the e820 legacy
  * (zeropage) memory map.
  */
+enum add_efi_mode {
+	ADD_EFI_ALL,
+	ADD_EFI_APPLICATION_RESERVED,
+};
 
-static void __init do_add_efi_memmap(void)
+static void __init do_add_efi_memmap(enum add_efi_mode mode)
 {
 	efi_memory_desc_t *md;
+	int add = 0;
+
+	if (!efi_enabled(EFI_MEMMAP))
+		return;
 
 	for_each_efi_memory_desc(md) {
 		unsigned long long start = md->phys_addr;
@@ -141,7 +152,9 @@ static void __init do_add_efi_memmap(void)
 		case EFI_BOOT_SERVICES_CODE:
 		case EFI_BOOT_SERVICES_DATA:
 		case EFI_CONVENTIONAL_MEMORY:
-			if (md->attribute & EFI_MEMORY_WB)
+			if (is_efi_application_reserved(md))
+				e820_type = E820_TYPE_APPLICATION_RESERVED;
+			else if (md->attribute & EFI_MEMORY_WB)
 				e820_type = E820_TYPE_RAM;
 			else
 				e820_type = E820_TYPE_RESERVED;
@@ -167,9 +180,22 @@ static void __init do_add_efi_memmap(void)
 			e820_type = E820_TYPE_RESERVED;
 			break;
 		}
+
+		if (e820_type == E820_TYPE_APPLICATION_RESERVED)
+			/* always add E820_TYPE_APPLICATION_RESERVED */;
+		else if (mode != ADD_EFI_APPLICATION_RESERVED)
+			continue;
+
+		add++;
 		e820__range_add(start, size, e820_type);
 	}
-	e820__update_table(e820_table);
+	if (add)
+		e820__update_table(e820_table);
+}
+
+void __init efi_find_application_reserved(void)
+{
+	do_add_efi_memmap(ADD_EFI_APPLICATION_RESERVED);
 }
 
 int __init efi_memblock_x86_reserve_range(void)
@@ -202,7 +228,7 @@ int __init efi_memblock_x86_reserve_range(void)
 		return rv;
 
 	if (add_efi_memmap)
-		do_add_efi_memmap();
+		do_add_efi_memmap(ADD_EFI_ALL);
 
 	WARN(efi.memmap.desc_version != 1,
 	     "Unexpected EFI_MEMORY_DESCRIPTOR version %ld",
@@ -753,6 +779,12 @@ static bool should_map_region(efi_memory_desc_t *md)
 	 * doesn't exist for 32-bit kernels.
 	 */
 	if (IS_ENABLED(CONFIG_X86_32))
+		return false;
+
+	/*
+	 * Specific purpose memory is reserved by default.
+	 */
+	if (is_efi_application_reserved(md))
 		return false;
 
 	/*
